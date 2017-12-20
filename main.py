@@ -1,3 +1,4 @@
+import os
 import os.path
 import tensorflow as tf
 import helper
@@ -165,7 +166,6 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
                                              keep_prob: 0.5,
                                              learning_rate: 1e-4})
             print("Loss {:.3f}".format(loss))
-            break
         break
     print('Finished train_nn')
 tests.test_train_nn(train_nn)
@@ -190,6 +190,7 @@ def run():
     batch_size = 20
     learning_rate = 0.001
 
+    os.system("rm -rf model")
     builder = tf.saved_model.builder.SavedModelBuilder('./model')
     with tf.Session() as sess:
         # Path to vgg model
@@ -219,7 +220,7 @@ def run():
         builder.add_meta_graph_and_variables(sess, ['test'])
 
         # Save inference data using helper.save_inference_samples
-        #helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
         # OPTIONAL: Apply the trained model to a video
     builder.save()
