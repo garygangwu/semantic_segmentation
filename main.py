@@ -189,7 +189,7 @@ def run():
     learning_rate = 0.001
 
     builder = tf.saved_model.builder.SavedModelBuilder('./model')
-    with tf.Session(graph=tf.Graph()) as sess:
+    with tf.Session() as sess:
         # Path to vgg model
         vgg_path = os.path.join(data_dir, 'vgg')
         # Create function to get batches
