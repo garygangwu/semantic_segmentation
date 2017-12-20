@@ -154,7 +154,6 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param learning_rate: TF Placeholder for learning rate
     """
 
-    #saver = tf.train.Saver()
     for epoch in range(epochs):
         print("epoch {}".format(epoch))
         for images, labels in get_batches_fn(batch_size):
@@ -166,9 +165,6 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
                                              keep_prob: 0.5,
                                              learning_rate: 1e-4})
             print("Loss {:.3f}".format(loss))
-            break
-        break
-        #saver.save(sess, './data/fcn', global_step=epoch)
     print('Finished train_nn')
 tests.test_train_nn(train_nn)
 
@@ -189,7 +185,7 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     epochs = 20
-    batch_size = 16
+    batch_size = 20
     learning_rate = 0.001
 
     builder = tf.saved_model.builder.SavedModelBuilder('./model')
