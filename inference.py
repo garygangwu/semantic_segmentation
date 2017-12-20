@@ -11,7 +11,7 @@ def main():
 
   input_image_tensor_name = 'image_input:0'
   keep_prob_tensor_name = 'keep_prob:0'
-  logits_tensor_name = 'logits:0'
+  logits_tensor_name = 'new_logits:0'
 
   with tf.Session() as sess:
     tf.saved_model.loader.load(sess, ['test'], MODEL_PATH)
