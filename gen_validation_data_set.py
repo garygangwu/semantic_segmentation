@@ -20,7 +20,7 @@ label_paths = {
   for path in glob(os.path.join(train_dir, 'gt_image_2', '*_road_*.png'))}
 
 random.shuffle(image_paths)
-image_paths = image_paths[:20]
+image_paths = image_paths[:10]
 for image_path in image_paths:
   valid_image_path = re.sub(r'/training/', '/valid/', image_path)
 
@@ -28,5 +28,5 @@ for image_path in image_paths:
   label_path = label_paths[filename]
   valid_label_path = re.sub(r'/training/', '/valid/', label_path)
 
-  os.system('mv {} {}'.format(label_path, valid_label_path))
-  os.system('mv {} {}'.format(image_path, valid_image_path))
+  os.system('cp {} {}'.format(label_path, valid_label_path))
+  os.system('cp {} {}'.format(image_path, valid_image_path))
