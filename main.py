@@ -10,9 +10,9 @@ flags = tf.app.flags
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('data_dir', './data', 'data fold location')
-flags.DEFINE_integer('epochs', 20, 'number of epochs for training')
-flags.DEFINE_integer('batch_size', 16, 'batch size per training')
-flags.DEFINE_float('learning_rate', 0.06, 'learning rate')
+flags.DEFINE_integer('epochs', 50, 'number of epochs for training')
+flags.DEFINE_integer('batch_size', 5, 'batch size per training')
+flags.DEFINE_float('learning_rate', 0.0009, 'learning rate')
 IMAGE_SHAPE = (160, 576)
 
 # Check TensorFlow Version
@@ -138,8 +138,8 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     reg_constant = 0.01
     loss_operation = tf.reduce_mean(cross_entropy_loss +  reg_constant * sum(reg_losses))
 
-    #optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
-    optimizer = tf.train.AdagradOptimizer(learning_rate = learning_rate)
+    optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
+    #optimizer = tf.train.AdagradOptimizer(learning_rate = learning_rate)
 
     # https://discussions.udacity.com/t/using-transfer-learning/487140?u=subodh.malgonde
     train_op = optimizer.minimize(loss_operation)
