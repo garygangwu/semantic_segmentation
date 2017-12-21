@@ -14,6 +14,7 @@ flags.DEFINE_integer('epochs', 50, 'number of epochs for training')
 flags.DEFINE_integer('batch_size', 5, 'batch size per training')
 flags.DEFINE_float('learning_rate', 0.0009, 'learning rate')
 IMAGE_SHAPE = (160, 576)
+USE_ORIGINAL_NUM_FILTERS = True
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -64,34 +65,34 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # Build the decode part of FCN-8
-    # 4095
-    conv_layer_7 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, strides=(1, 1),
+    filters = 4096 if USE_ORIGINAL_NUM_FILTERS else num_classes
+    conv_layer_7 = tf.layers.conv2d(vgg_layer7_out, filters, 1, strides=(1, 1),
                                     padding='same', activation=tf.nn.relu,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_7')
 
-    # 512
-    dconv_layer_7 = tf.layers.conv2d_transpose(conv_layer_7, num_classes, 4, strides=(2, 2),
+    filters = 512 if USE_ORIGINAL_NUM_FILTERS else num_classes
+    dconv_layer_7 = tf.layers.conv2d_transpose(conv_layer_7, filters, 4, strides=(2, 2),
                                                padding='same', activation=tf.nn.relu,
                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                                name='new_dconv_layer_7')
 
-    # 512
-    conv_layer_4 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1, 1),
+    filters = 512 if USE_ORIGINAL_NUM_FILTERS else num_classes
+    conv_layer_4 = tf.layers.conv2d(vgg_layer4_out, filters, 1, strides=(1, 1),
                                     padding='same', activation=tf.nn.relu,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_4')
 
     skip_layer_4 = tf.add(conv_layer_4, dconv_layer_7, name='new_skip_layer_4')
 
-    # 512
-    dconv_layer_4 = tf.layers.conv2d_transpose(skip_layer_4, num_classes, 4, strides=(2, 2),
+    filters = 256 if USE_ORIGINAL_NUM_FILTERS else num_classes
+    dconv_layer_4 = tf.layers.conv2d_transpose(skip_layer_4, filters, 4, strides=(2, 2),
                                                padding='same', activation=tf.nn.relu,
                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                                name='new_dconf_layer_4')
 
-    # 512
-    conv_layer_3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1, 1),
+    filters = 256 if USE_ORIGINAL_NUM_FILTERS else num_classes
+    conv_layer_3 = tf.layers.conv2d(vgg_layer3_out, filters, 1, strides=(1, 1),
                                     padding='same', activation=tf.nn.relu,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_3')
