@@ -12,7 +12,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('data_dir', './data', 'data fold location')
 flags.DEFINE_integer('epochs', 50, 'number of epochs for training')
 flags.DEFINE_integer('batch_size', 5, 'batch size per training')
-flags.DEFINE_float('learning_rate', 0.0009, 'learning rate')
+flags.DEFINE_float('learning_rate', 0.001, 'learning rate')
 IMAGE_SHAPE = (160, 576)
 USE_ORIGINAL_NUM_FILTERS = True
 
@@ -67,7 +67,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # Build the decode part of FCN-8
     filters = 4096 if USE_ORIGINAL_NUM_FILTERS else num_classes
     conv_layer_7 = tf.layers.conv2d(vgg_layer7_out, filters, 1, strides=(1, 1),
-                                    padding='same', activation=tf.nn.relu,
+                                    padding='same',
+                                    activation=tf.nn.relu,
+                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_7')
 
@@ -79,7 +81,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
 
     filters = 512 if USE_ORIGINAL_NUM_FILTERS else num_classes
     conv_layer_4 = tf.layers.conv2d(vgg_layer4_out, filters, 1, strides=(1, 1),
-                                    padding='same', activation=tf.nn.relu,
+                                    padding='same',
+                                    activation=tf.nn.relu,
+                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_4')
 
@@ -87,20 +91,26 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
 
     filters = 256 if USE_ORIGINAL_NUM_FILTERS else num_classes
     dconv_layer_4 = tf.layers.conv2d_transpose(skip_layer_4, filters, 4, strides=(2, 2),
-                                               padding='same', activation=tf.nn.relu,
+                                               padding='same',
+                                               activation=tf.nn.relu,
+                                               kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                                name='new_dconf_layer_4')
 
     filters = 256 if USE_ORIGINAL_NUM_FILTERS else num_classes
     conv_layer_3 = tf.layers.conv2d(vgg_layer3_out, filters, 1, strides=(1, 1),
-                                    padding='same', activation=tf.nn.relu,
+                                    padding='same',
+                                    activation=tf.nn.relu,
+                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_3')
 
     skip_layer_3 = tf.add(conv_layer_3, dconv_layer_4, name='new_skip_layer_3')
 
     dconv_layer_3 = tf.layers.conv2d_transpose(skip_layer_3, num_classes, 16, strides=(8, 8),
-                                               padding='same', activation=tf.nn.relu,
+                                               padding='same',
+                                               activation=tf.nn.relu,
+                                               kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                                name='new_dconf_layer_3')
 
