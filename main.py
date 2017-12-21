@@ -64,29 +64,34 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # Build the decode part of FCN-8
-    conv_layer_7 = tf.layers.conv2d(vgg_layer7_out, 4096, 1, strides=(1, 1),
+    # 4095
+    conv_layer_7 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, strides=(1, 1),
                                     padding='same', activation=tf.nn.relu,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_7')
 
-    dconv_layer_7 = tf.layers.conv2d_transpose(conv_layer_7, 512, 4, strides=(2, 2),
+    # 512
+    dconv_layer_7 = tf.layers.conv2d_transpose(conv_layer_7, num_classes, 4, strides=(2, 2),
                                                padding='same', activation=tf.nn.relu,
                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                                name='new_dconv_layer_7')
 
-    conv_layer_4 = tf.layers.conv2d(vgg_layer4_out, 512, 1, strides=(1, 1),
+    # 512
+    conv_layer_4 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1, 1),
                                     padding='same', activation=tf.nn.relu,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_4')
 
     skip_layer_4 = tf.add(conv_layer_4, dconv_layer_7, name='new_skip_layer_4')
 
-    dconv_layer_4 = tf.layers.conv2d_transpose(skip_layer_4, 256, 4, strides=(2, 2),
+    # 512
+    dconv_layer_4 = tf.layers.conv2d_transpose(skip_layer_4, num_classes, 4, strides=(2, 2),
                                                padding='same', activation=tf.nn.relu,
                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                                name='new_dconf_layer_4')
 
-    conv_layer_3 = tf.layers.conv2d(vgg_layer3_out, 256, 1, strides=(1, 1),
+    # 512
+    conv_layer_3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1, 1),
                                     padding='same', activation=tf.nn.relu,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_3')
