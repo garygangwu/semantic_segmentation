@@ -72,6 +72,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
                                     kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_7')
+    conv_layer_7 = tf.layers.batch_normalization(conv_layer_7,
+                                                 name="new_conv_layer_7_normalization",
+                                                 training = is_training)
 
     filters = 512 if USE_ORIGINAL_NUM_FILTERS else num_classes
     dconv_layer_7 = tf.layers.conv2d_transpose(conv_layer_7, filters, 4, strides=(2, 2),
@@ -89,6 +92,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
                                     kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_4')
+    conv_layer_4 = tf.layers.batch_normalization(conv_layer_4,
+                                                 name="new_conv_layer_4_normalization",
+                                                 training = is_training)
 
     skip_layer_4 = tf.add(conv_layer_4, dconv_layer_7, name='new_skip_layer_4')
 
@@ -110,6 +116,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
                                     kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                     name='new_conv_layer_3')
+    conv_layer_3 = tf.layers.batch_normalization(conv_layer_3,
+                                                 name="new_conv_layer_3_normalization",
+                                                 training = is_training)
 
     skip_layer_3 = tf.add(conv_layer_3, dconv_layer_4, name='new_skip_layer_3')
 
