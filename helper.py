@@ -148,6 +148,27 @@ def gen_batch_function(data_folder, image_shape):
     return get_batches_fn
 
 
+def smooth_prediction(segmentation):
+    shape = segmentation.shape
+    for i in range(1, shape[0]-1):
+        for j in range(1, shape[1]-1):
+            if segmentation[i][j] == 1:
+                surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
+                  egmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1]
+                  segmentation[i][j-1] + segmentation[i][j+1]
+                if surround_sum == 0:
+                    segmentation[i][j] = 0
+    for i in range(1, shape[0]-1):
+        for j in range(1, shape[1]-1):
+            if segmentation[i][j] == 0:
+                surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
+                  egmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1]
+                  segmentation[i][j-1] + segmentation[i][j+1]
+                if surround_sum == 8:
+                    segmentation[i][j] = 1
+    return segmentation
+
+
 def gen_test_output(sess, logits, keep_prob, is_training, image_pl, data_folder, image_shape):
     """
     Generate test output using the test images
@@ -166,7 +187,8 @@ def gen_test_output(sess, logits, keep_prob, is_training, image_pl, data_folder,
             [tf.nn.softmax(logits)],
             {keep_prob: 1.0, is_training: False, image_pl: [image]})
         im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
-        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
+        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1).astype(np.uint8)
+        segmentation = smooth_prediction(segmentation)
         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
         mask = scipy.misc.toimage(mask, mode="RGBA")
         street_im = scipy.misc.toimage(image)
