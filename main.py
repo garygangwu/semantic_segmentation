@@ -66,6 +66,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
     :return: The Tensor for the last layer of output
     """
     # Build the decode part of FCN-8
+    vgg_layer3_out = tf.multiply(vgg_layer3_out, 0.0001)
+    vgg_layer4_out = tf.multiply(vgg_layer4_out, 0.01)
+
     vgg_layer7_n = tf.layers.batch_normalization(vgg_layer7_out,
                                                  name="new_vgg_layer7_normalization",
                                                  training = is_training)
