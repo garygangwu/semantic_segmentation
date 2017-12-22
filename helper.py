@@ -11,6 +11,7 @@ from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
 import cv2
+import matplotlib.pyplot as plt
 
 
 class DLProgress(tqdm):
@@ -86,6 +87,17 @@ def get_validation_data(data_folder, image_shape):
     return np.array(images), np.array(gt_images)
 
 
+def set_background_color(gt_image, background_color, new_background_color):
+    shape = gt_image.shape
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            #if np.array_equal(gt_image[i][j], new_background_color):
+            #    gt_image[i][j] = background_color
+            if gt_image[i][j][0] != 255:
+                gt_image[i][j] = background_color
+    return gt_image
+
+
 def gen_batch_function(data_folder, image_shape):
     """
     Generate function to create batches of training data
@@ -104,29 +116,43 @@ def gen_batch_function(data_folder, image_shape):
             re.sub(r'_(lane|road)_', '_', os.path.basename(path)): path
             for path in glob(os.path.join(data_folder, 'gt_image_2', '*_road_*.png'))}
         background_color = np.array([255, 0, 0])
+        new_background_color = np.array([0, 0, 0])
 
         random.shuffle(image_paths)
-        for batch_i in range(0, len(image_paths), batch_size):
-            images = []
-            gt_images = []
-            for image_file in image_paths[batch_i:batch_i+batch_size]:
-                gt_image_file = label_paths[os.path.basename(image_file)]
+        #for batch_i in range(0, len(image_paths), batch_size):
+        #    images = []
+        #    gt_images = []
+        #    for image_file in image_paths[batch_i:batch_i+batch_size]:
+        images = []
+        gt_images = []
+        for image_file in image_paths:
+            gt_image_file = label_paths[os.path.basename(image_file)]
 
-                image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
-                gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
+            image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
+            gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
+            #plt.imshow(np.concatenate((gt_image, image), axis=0))
+            #plt.show()
 
-                if random.random() >= 0.5:
-                    image = cv2.flip(image, 1)
-                    gt_image = cv2.flip(gt_image, 1)
+            gt_image = set_background_color(gt_image, background_color, new_background_color)
+            #plt.imshow(np.concatenate((gt_image, image), axis=0))
+            #plt.show()
 
-                gt_bg = np.all(gt_image == background_color, axis=2)
-                gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
-                gt_image = np.concatenate((gt_bg, np.invert(gt_bg)), axis=2)
+            gt_bg = np.all(gt_image == background_color, axis=2)
+            gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
+            gt_image = np.concatenate((gt_bg, np.invert(gt_bg)), axis=2)
 
-                images.append(image)
-                gt_images.append(gt_image)
+            flip_image = cv2.flip(image, 1)
+            flip_gt_image = gt_image[:,::-1,:]
 
-            yield np.array(images), np.array(gt_images)
+            images.append(image)
+            gt_images.append(gt_image)
+
+            images.append(flip_image)
+            gt_images.append(flip_gt_image)
+            if len(images) >= batch_size:
+                yield np.array(images), np.array(gt_images)
+                images = []
+                gt_images = []
     return get_batches_fn
 
 
