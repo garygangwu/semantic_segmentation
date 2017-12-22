@@ -13,6 +13,7 @@ flags.DEFINE_string('data_dir', './data', 'data fold location')
 flags.DEFINE_integer('epochs', 50, 'number of epochs for training')
 flags.DEFINE_integer('batch_size', 10, 'batch size per training')
 flags.DEFINE_float('learning_rate', 0.001, 'learning rate')
+flags.DEFINE_float('keep_prob', 0.5, 'keep prob')
 IMAGE_SHAPE = (160, 576)
 USE_ORIGINAL_NUM_FILTERS = True
 
@@ -198,7 +199,11 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     #optimizer = tf.train.AdagradOptimizer(learning_rate = learning_rate)
 
     # https://discussions.udacity.com/t/using-transfer-learning/487140?u=subodh.malgonde
-    train_op = optimizer.minimize(loss_operation)
+    var_list = [var for var in tf.trainable_variables() if 'new_' in var.name]
+    print('Trainable variables: ', var_list)
+    train_op = optimizer.minimize(
+        loss_operation,
+        var_list = var_list)
 
     return logits, train_op, loss_operation, accuracy_op
 #tests.test_optimize(optimize)
@@ -295,7 +300,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, logits, loss_op
             _, loss = sess.run([train_op, loss_op],
                                 feed_dict = {input_image: images,
                                              correct_label: labels,
-                                             keep_prob: 1.0,
+                                             keep_prob: FLAGS.keep_prob,
                                              learning_rate: FLAGS.learning_rate,
                                              is_training: True})
             print("Loss {:.3f}".format(loss))
@@ -351,8 +356,8 @@ def run():
 
         # Train NN using the train_nn function
         sess.run(tf.global_variables_initializer())
-        #my_variable_initializers = [var.initializer for var in tf.global_variables() if 'new_' in var.name]
-        #sess.run(my_variable_initializers)
+        my_variable_initializers = [var.initializer for var in tf.trainable_variables() if 'new_' in var.name]
+        sess.run(my_variable_initializers)
 
         train_nn(sess, FLAGS.epochs, FLAGS.batch_size, get_batches_fn, train_op, logits,
                  loss_op, accuracy_op, input_image, correct_label, keep_prob, learning_rate, is_training)
