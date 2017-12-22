@@ -119,10 +119,6 @@ def gen_batch_function(data_folder, image_shape):
         new_background_color = np.array([0, 0, 0])
 
         random.shuffle(image_paths)
-        #for batch_i in range(0, len(image_paths), batch_size):
-        #    images = []
-        #    gt_images = []
-        #    for image_file in image_paths[batch_i:batch_i+batch_size]:
         images = []
         gt_images = []
         for image_file in image_paths:
@@ -130,12 +126,8 @@ def gen_batch_function(data_folder, image_shape):
 
             image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
             gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
-            #plt.imshow(np.concatenate((gt_image, image), axis=0))
-            #plt.show()
-
+            # Remove the black clolr in the gt images
             gt_image = set_background_color(gt_image, background_color, new_background_color)
-            #plt.imshow(np.concatenate((gt_image, image), axis=0))
-            #plt.show()
 
             gt_bg = np.all(gt_image == background_color, axis=2)
             gt_bg = gt_bg.reshape(*gt_bg.shape, 1)

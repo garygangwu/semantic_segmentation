@@ -280,7 +280,8 @@ def evaluate_accurancy(sess,
     num_images = valid_labels.shape[0]
     im_softmax = im_softmax.reshape(num_images, IMAGE_SHAPE[0], IMAGE_SHAPE[1], 2)
     print('accuracy = ', accuracy)
-    print_evaluate_results(im_softmax, valid_labels)
+    #print_evaluate_results(im_softmax, valid_labels)
+    return accuracy
 
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, logits, loss_op, accuracy_op,
@@ -302,21 +303,25 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, logits, loss_op
     valid_images, valid_labels = helper.get_validation_data(
         os.path.join(FLAGS.data_dir, 'data_road/valid'), IMAGE_SHAPE)
 
+    ACCURACY_THRESHOLD = 0.927 
     for epoch in range(epochs):
-        print("epoch {}".format(epoch))
+        print("epoch {}: batch size: {}".format(epoch, batch_size))
         for images, labels in get_batches_fn(batch_size):
-            print("Number of images: {}, number of labels: {}".format(len(images), len(labels)))
             _, loss = sess.run([train_op, loss_op],
                                 feed_dict = {input_image: images,
                                              correct_label: labels,
                                              keep_prob: FLAGS.keep_prob,
                                              learning_rate: FLAGS.learning_rate,
                                              is_training: True})
-            print("Loss {:.3f}".format(loss))
-            evaluate_accurancy(sess,
-                               logits, accuracy_op,
-                               input_image, correct_label, keep_prob, is_training,
-                               valid_images, valid_labels)
+            print("{}: Loss {:.3f}".format(epoch, loss))
+            accuracy = evaluate_accurancy(sess,
+                                          logits, accuracy_op,
+                                          input_image, correct_label, keep_prob, is_training,
+                                          valid_images, valid_labels)
+            if accuracy >= ACCURACY_THRESHOLD:
+                break
+        if accuracy >= ACCURACY_THRESHOLD:
+            break
     print('Finished train_nn')
 #tests.test_train_nn(train_nn)
 
