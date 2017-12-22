@@ -66,8 +66,11 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
     :return: The Tensor for the last layer of output
     """
     # Build the decode part of FCN-8
+    vgg_layer7_n = tf.layers.batch_normalization(vgg_layer7_out,
+                                                 name="new_vgg_layer7_normalization",
+                                                 training = is_training)
     filters = 4096 if USE_ORIGINAL_NUM_FILTERS else num_classes
-    conv_layer_7 = tf.layers.conv2d(vgg_layer7_out, filters, 1, strides=(1, 1),
+    conv_layer_7 = tf.layers.conv2d(vgg_layer7_n, filters, 1, strides=(1, 1),
                                     padding='same',
                                     activation=tf.nn.relu,
                                     kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
@@ -86,8 +89,11 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
                                                   name="new_dconv_layer_7_normalization",
                                                   training = is_training)
 
+    vgg_layer4_n = tf.layers.batch_normalization(vgg_layer4_out,
+                                                 name="new_vgg_layer4_normalization",
+                                                 training = is_training)
     filters = 512 if USE_ORIGINAL_NUM_FILTERS else num_classes
-    conv_layer_4 = tf.layers.conv2d(vgg_layer4_out, filters, 1, strides=(1, 1),
+    conv_layer_4 = tf.layers.conv2d(vgg_layer4_n, filters, 1, strides=(1, 1),
                                     padding='same',
                                     activation=tf.nn.relu,
                                     kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
@@ -110,8 +116,11 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes, is_train
                                                   name="new_dconv_layer_4_normalization",
                                                   training = is_training)
 
+    vgg_layer3_n = tf.layers.batch_normalization(vgg_layer3_out,
+                                                 name="new_vgg_layer3_normalization",
+                                                 training = is_training)
     filters = 256 if USE_ORIGINAL_NUM_FILTERS else num_classes
-    conv_layer_3 = tf.layers.conv2d(vgg_layer3_out, filters, 1, strides=(1, 1),
+    conv_layer_3 = tf.layers.conv2d(vgg_layer3_n, filters, 1, strides=(1, 1),
                                     padding='same',
                                     activation=tf.nn.relu,
                                     kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
