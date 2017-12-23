@@ -150,22 +150,30 @@ def gen_batch_function(data_folder, image_shape):
 
 def smooth_prediction(segmentation):
     shape = segmentation.shape
+    zeros = []
     for i in range(1, shape[0]-1):
         for j in range(1, shape[1]-1):
             if segmentation[i][j] == 1:
                 surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
-                  egmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1]
+                  segmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1] +\
                   segmentation[i][j-1] + segmentation[i][j+1]
-                if surround_sum == 0:
-                    segmentation[i][j] = 0
+                if surround_sum <= 2:
+                    zeros.append((i, j))
+    ones = []
     for i in range(1, shape[0]-1):
         for j in range(1, shape[1]-1):
             if segmentation[i][j] == 0:
                 surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
-                  egmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1]
+                  segmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1] +\
                   segmentation[i][j-1] + segmentation[i][j+1]
-                if surround_sum == 8:
-                    segmentation[i][j] = 1
+                if surround_sum >= 5:
+                    ones.append((i, j))
+    for zero in zeros:
+        i, j = zero
+        segmentation[i][j] = 0
+    for one in ones:
+        i, j = one
+        segmentation[i][j] = 1
     return segmentation
 
 
