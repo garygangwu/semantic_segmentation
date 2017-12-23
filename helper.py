@@ -177,6 +177,22 @@ def smooth_prediction(segmentation):
     return segmentation
 
 
+def get_semantic_segmentation_image(original_image, sess, logits, keep_prob, is_training, image_pl, image_shape):
+    image = scipy.misc.imresize(original_image, image_shape)
+    im_softmax = sess.run(
+            tf.nn.softmax(logits),
+            {keep_prob: 1.0, is_training: False, image_pl: [image]})
+    im_softmax = im_softmax[:, 1].reshape(image_shape[0], image_shape[1])
+    segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1).astype(np.uint8)
+    segmentation = smooth_prediction(segmentation)
+    mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+    mask = scipy.misc.imresize(mask, original_image.shape)
+    mask = scipy.misc.toimage(mask, mode="RGBA")
+    overlayed_img = scipy.misc.toimage(original_image)
+    overlayed_img.paste(mask, box=None, mask=mask)
+    return overlayed_img
+
+
 def gen_test_output(sess, logits, keep_prob, is_training, image_pl, data_folder, image_shape):
     """
     Generate test output using the test images
@@ -189,19 +205,9 @@ def gen_test_output(sess, logits, keep_prob, is_training, image_pl, data_folder,
     :return: Output for for each test image
     """
     for image_file in glob(os.path.join(data_folder, 'image_2', '*.png')):
-        image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
-
-        im_softmax = sess.run(
-            [tf.nn.softmax(logits)],
-            {keep_prob: 1.0, is_training: False, image_pl: [image]})
-        im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
-        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1).astype(np.uint8)
-        segmentation = smooth_prediction(segmentation)
-        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-        mask = scipy.misc.toimage(mask, mode="RGBA")
-        street_im = scipy.misc.toimage(image)
-        street_im.paste(mask, box=None, mask=mask)
-
+        original_image = scipy.misc.imread(image_file)
+        street_im = get_semantic_segmentation_image(
+            original_image, sess, logits, keep_prob, is_training, image_pl, image_shape)
         yield os.path.basename(image_file), np.array(street_im)
 
 
