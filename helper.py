@@ -159,6 +159,14 @@ def smooth_prediction(segmentation):
                   segmentation[i][j-1] + segmentation[i][j+1]
                 if surround_sum <= 2:
                     zeros.append((i, j))
+    i = shape[0]-1
+    for j in range(1, shape[1]-1):
+        if segmentation[i][j] == 1:
+            surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
+                  segmentation[i][j-1] + segmentation[i][j+1]
+            if surround_sum <= 1:
+                zeros.append((i, j))
+
     ones = []
     for i in range(1, shape[0]-1):
         for j in range(1, shape[1]-1):
@@ -166,8 +174,15 @@ def smooth_prediction(segmentation):
                 surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
                   segmentation[i+1][j-1] + segmentation[i+1][j] + segmentation[i+1][j+1] +\
                   segmentation[i][j-1] + segmentation[i][j+1]
-                if surround_sum >= 5:
+                if surround_sum >= 4:
                     ones.append((i, j))
+    i = shape[0]-1
+    for j in range(1, shape[1]-1):
+        if segmentation[i][j] == 0:
+            surround_sum = segmentation[i-1][j-1] + segmentation[i-1][j] + segmentation[i-1][j+1] +\
+                  segmentation[i][j-1] + segmentation[i][j+1]
+            if surround_sum >= 3:
+                ones.append((i, j))
     for zero in zeros:
         i, j = zero
         segmentation[i][j] = 0
